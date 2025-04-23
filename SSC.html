@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Symptom Checker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Symptom Checker</h1>
+    <input type="text" id="symptomInput" placeholder="Enter your symptom..." />
+    <button onclick="checkSymptom()">Check</button>
+    <table id="resultTable" style="display:none">
+      <thead>
+        <tr>
+          <th>Symptom</th>
+          <th>Diagnosis</th>
+          <th>Treatment/Description</th>
+        </tr>
+      </thead>
+      <tbody id="resultBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const database = {
+      fever: {
+        diagnosis: "Possible viral or bacterial infection",
+        treatment: "Stay hydrated, take paracetamol, consult doctor if persists"
+      },
+      headache: {
+        diagnosis: "Could be tension, migraine, or dehydration",
+        treatment: "Rest, hydration, pain relievers"
+      },
+      cough: {
+        diagnosis: "Common cold or respiratory infection",
+        treatment: "Cough syrup, rest, see a doctor if persistent"
+      },
+      fatigue: {
+        diagnosis: "Lack of sleep, stress, or underlying illness",
+        treatment: "Proper rest, nutrition, consult if chronic"
+      },
+      nausea: {
+        diagnosis: "Digestive issues or early signs of illness",
+        treatment: "Eat light, stay hydrated, consider anti-nausea medication"
+      },
+      sore_throat: {
+    diagnosis: "A sore throat can result from viral infections like the common cold or flu, bacterial infections like strep throat, or irritants like smoke or dry air.",
+    treatment: "Gargle with warm salt water, stay hydrated, use throat lozenges, and take over-the-counter pain relievers. Seek medical attention if the sore throat is severe, lasts more than a few days, or is accompanied by high fever."
+  },
+  shortness_of_breath: {
+    diagnosis: "Shortness of breath may be due to asthma, chronic obstructive pulmonary disease (COPD), heart conditions, anxiety, or infections like pneumonia.",
+    treatment: "Rest, use prescribed inhalers if applicable, and avoid strenuous activities. Seek immediate medical attention if shortness of breath is sudden, severe, or accompanied by chest pain."
+  },
+  chest_pain: {
+    diagnosis: "Chest pain can be caused by heart-related issues like angina or heart attack, respiratory conditions like pneumonia, or gastrointestinal problems like acid reflux.",
+    treatment: "Rest, take prescribed medications, and avoid exertion. Seek emergency medical care if chest pain is severe, lasts more than a few minutes, or is accompanied by shortness of breath, sweating, or nausea."
+  },
+  dizziness: {
+    diagnosis: "Dizziness may result from inner ear problems, low blood pressure, dehydration, anemia, or neurological conditions.",
+    treatment: "Sit or lie down until dizziness passes, stay hydrated, and avoid sudden movements. Consult a healthcare provider if dizziness is frequent or accompanied by other symptoms like fainting or blurred vision."
+  },
+  diarrhea: {
+    diagnosis: "Diarrhea can be caused by infections (viral, bacterial, or parasitic), food intolerances, medications, or digestive disorders like irritable bowel syndrome (IBS).",
+    treatment: "Stay hydrated with water and electrolyte solutions, eat bland foods, and avoid dairy, caffeine, and fatty foods. Seek medical attention if diarrhea persists for more than two days, or is accompanied by high fever or blood in stools."
+  },
+  constipation: {
+    diagnosis: "Constipation may result from a low-fiber diet, dehydration, lack of physical activity, medications, or underlying health conditions.",
+    treatment: "Increase fiber intake, drink plenty of fluids, exercise regularly, and consider over-the-counter laxatives if necessary. Consult a doctor if constipation persists or is accompanied by severe pain."
+  },
+  back_pain: {
+    diagnosis: "Back pain can stem from muscle strain, herniated discs, arthritis, osteoporosis, or poor posture.",
+    treatment: "Apply heat or cold packs, engage in gentle stretching exercises, maintain good posture, and take pain relievers. Seek medical advice if back pain is severe, persistent, or radiates to the legs."
+  },
+  runny_nose: {
+    diagnosis: "A runny nose is often a symptom of the common cold, allergies, sinus infections, or irritants like smoke.",
+    treatment: "Use saline nasal sprays, stay hydrated, and use antihistamines if allergies are the cause. Consult a healthcare provider if symptoms persist or are accompanied by facial pain or swelling."
+  },
+  sneezing: {
+    diagnosis: "Sneezing can be triggered by allergies, infections, or irritants like dust and strong odors.",
+    treatment: "Avoid known allergens, use antihistamines, and maintain good indoor air quality. Seek medical advice if sneezing is persistent or accompanied by other symptoms."
+  },
+  itchy_eyes: {
+    diagnosis: "Itchy eyes may result from allergies, dry eyes, or infections like conjunctivitis.",
+    treatment: "Use lubricating eye drops, apply cold compresses, and avoid rubbing the eyes. Consult an eye specialist if symptoms persist or worsen."
+  },
+  blurred_vision: {
+    diagnosis: "Blurred vision can be caused by refractive errors, eye strain, infections, or systemic conditions like diabetes.",
+    treatment: "Rest your eyes, ensure proper lighting when reading or using screens, and consult an eye care professional for a comprehensive eye exam."
+  },
+  ear_pain: {
+    diagnosis: "Ear pain may result from infections, earwax buildup, or pressure changes.",
+    treatment: "Apply warm compresses, use over-the-counter pain relievers, and consult a healthcare provider if pain persists or is accompanied by hearing loss."
+  },
+  skin_rash: {
+    diagnosis: "Skin rashes can be caused by allergic reactions, infections, or chronic skin conditions like eczema.",
+    treatment: "Keep the affected area clean and dry, use topical creams as recommended, and avoid known irritants. Seek medical attention if the rash spreads or is accompanied by fever."
+  },
+  joint_pain: {
+    diagnosis: "Joint pain may stem from arthritis, injuries, or infections.",
+    treatment: "Rest the affected joint, apply ice or heat, engage in low-impact exercises, and take anti-inflammatory medications. Consult a doctor if pain is severe or persistent."
+  }
+    };
+
+    function checkSymptom() {
+      const input = document.getElementById("symptomInput").value.toLowerCase();
+      const resultTable = document.getElementById("resultTable");
+      const resultBody = document.getElementById("resultBody");
+      resultBody.innerHTML = "";
+
+      if (database[input]) {
+        const data = database[input];
+        const row = `<tr><td>${input}</td><td>${data.diagnosis}</td><td>${data.treatment}</td></tr>`;
+        resultBody.innerHTML = row;
+        resultTable.style.display = "table";
+      } else {
+        const row = `<tr><td colspan="3">No diagnosis found for "${input}". Please consult a healthcare provider.</td></tr>`;
+        resultBody.innerHTML = row;
+        resultTable.style.display = "table";
+      }
+    }
+  </script>
+</body>
+</html>
